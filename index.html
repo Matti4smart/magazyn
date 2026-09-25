@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#20241F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Magazyn">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Magazyn Domowy</title>
+<script src="config.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --tlo:#EFEEE9;
+  --karta:#FFFFFF;
+  --atrament:#20241F;
+  --szary:#6B7066;
+  --linia:#DBD9D0;
+  --tasma:#F5B301;
+  --tasma-ciemna:#8A6400;
+  --ok:#2E7D46;
+  --blad:#B3391E;
+  --promien:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--tlo);
+  color:var(--atrament);
+  font-size:15px;
+  padding-bottom:76px;
+}
+h1,h2,h3,.btn,.tabbtn{font-family:'Archivo',sans-serif}
+
+header{
+  background:var(--atrament);
+  color:#F4F3EE;
+  padding:14px 18px 12px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:20;
+}
+header h1{font-size:19px;font-weight:700;letter-spacing:.4px;font-stretch:85%}
+header h1 span{color:var(--tasma)}
+#btnArkusz{background:none;border:1px solid #4A4F47;color:#C9CCC4;border-radius:8px;padding:6px 10px;font-size:12px;font-family:'Inter';cursor:pointer}
+
+nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:30;
+  background:var(--karta);border-top:1px solid var(--linia);
+  display:flex;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.tabbtn{
+  flex:1;border:none;background:none;padding:10px 4px 12px;
+  font-size:12.5px;font-weight:600;color:var(--szary);cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+}
+.tabbtn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.tabbtn.act{color:var(--atrament)}
+.tabbtn.act::after{content:'';width:26px;height:3px;background:var(--tasma);border-radius:2px;margin-top:2px}
+
+main{max-width:560px;margin:0 auto;padding:16px}
+section{display:none}
+section.act{display:block}
+.karta{background:var(--karta);border:1px solid var(--linia);border-radius:var(--promien);padding:16px}
+
+label{display:block;font-size:12.5px;font-weight:600;color:var(--szary);margin:14px 0 5px;text-transform:uppercase;letter-spacing:.5px}
+input[type=text],textarea,select{
+  width:100%;border:1.5px solid var(--linia);border-radius:10px;
+  padding:11px 12px;font-size:16px;font-family:'Inter';background:#FCFBF8;color:var(--atrament);
+}
+input:focus,textarea:focus{outline:2px solid var(--tasma);outline-offset:-1px;border-color:var(--tasma)}
+textarea{resize:vertical;min-height:64px}
+
+/* podgląd zdjęcia (pokazywany dopiero po wybraniu) */
+.fotoPodglad{
+  border-radius:var(--promien);overflow:hidden;position:relative;margin-bottom:2px;
+}
+.fotoPodglad img{width:100%;max-height:260px;object-fit:cover;display:block}
+.fotoUsun{
+  position:absolute;top:8px;right:8px;background:rgba(32,36,31,.85);color:#fff;
+  border:none;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;
+}
+.fotoInfo{font-size:12px;color:var(--szary);margin-top:6px;min-height:16px}
+.fotoPrzyciski{display:flex;gap:8px;margin-top:10px}
+.fotoPrzyciski button{
+  flex:1;border:1.5px solid var(--linia);background:#FCFBF8;border-radius:10px;
+  padding:11px 6px;font-size:14px;font-family:'Inter';font-weight:600;color:var(--atrament);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;
+}
+.fotoPrzyciski button:active{background:#F0EEE7}
+.fotoPrzyciski svg{width:19px;height:19px;stroke:var(--atrament);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+
+.btn{
+  width:100%;border:none;border-radius:12px;padding:14px;
+  font-size:16px;font-weight:700;cursor:pointer;margin-top:18px;letter-spacing:.3px;
+}
+.btn-glowny{background:var(--tasma);color:var(--atrament)}
+.btn-glowny:active{transform:scale(.985)}
+.btn[disabled]{opacity:.55}
+
+.etykieta{
+  display:inline-block;background:var(--tasma);color:var(--atrament);
+  font-family:'Archivo';font-weight:700;font-size:12.5px;
+  padding:3px 10px;border-radius:3px;transform:rotate(-1.2deg);
+  box-shadow:0 1px 0 rgba(0,0,0,.15);
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle;
+}
+
+#szukajPole{margin-bottom:12px;position:relative}
+#szukajPole input{padding-left:38px}
+#szukajPole svg{position:absolute;left:11px;top:12px;width:19px;height:19px;stroke:var(--szary);fill:none;stroke-width:2}
+.licznik{font-size:12.5px;color:var(--szary);margin:2px 2px 10px}
+.pozycja{
+  background:var(--karta);border:1px solid var(--linia);border-radius:var(--promien);
+  display:flex;gap:12px;padding:10px;margin-bottom:10px;cursor:pointer;align-items:center;
+}
+.pozycja .mini{
+  width:64px;height:64px;border-radius:10px;object-fit:cover;flex-shrink:0;
+  background:var(--tlo);display:flex;align-items:center;justify-content:center;
+}
+.pozycja .mini svg{width:26px;height:26px;stroke:var(--linia);stroke-width:1.6;fill:none}
+.pozycja .tresc{min-width:0;flex:1}
+.pozycja h3{font-size:15.5px;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pozycja .meta{font-size:12px;color:var(--szary);margin-top:4px}
+.pusto{padding:36px 12px;text-align:center;color:var(--szary);font-size:14px}
+.pusto b{display:block;font-family:'Archivo';font-size:16px;color:var(--atrament);margin-bottom:4px}
+
+#modal{
+  position:fixed;inset:0;background:rgba(32,36,31,.55);z-index:50;
+  display:none;align-items:flex-end;justify-content:center;
+}
+#modal.otw{display:flex}
+#modalKarta{
+  background:var(--karta);border-radius:20px 20px 0 0;width:100%;max-width:560px;
+  max-height:88vh;overflow-y:auto;padding:18px 18px 26px;
+}
+#modalKarta .uchwyt{width:42px;height:4px;background:var(--linia);border-radius:2px;margin:0 auto 14px}
+#modalFoto{width:100%;border-radius:12px;margin:10px 0;display:none}
+#modalFotoStan{font-size:13px;color:var(--szary);margin:8px 0}
+.mrzad{margin:10px 0;font-size:14.5px}
+.mrzad b{font-size:12px;color:var(--szary);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:2px}
+.btn-usun{background:none;border:1.5px solid var(--blad);color:var(--blad);margin-top:14px}
+.btn-edytuj{background:var(--atrament);color:#fff;margin-top:16px}
+
+/* pełnoekranowy podgląd zdjęcia pożyczki */
+#foto-overlay{
+  position:fixed;inset:0;background:rgba(20,22,19,.92);z-index:70;
+  display:none;align-items:center;justify-content:center;padding:16px;
+}
+#foto-overlay.otw{display:flex}
+#foto-overlay img{max-width:100%;max-height:88vh;border-radius:10px}
+#foto-overlay .stan{color:#C9CCC4;font-size:14px;position:absolute;bottom:26px;left:0;right:0;text-align:center}
+#foto-overlay .zamknij{
+  position:absolute;top:14px;right:14px;background:rgba(255,255,255,.14);color:#fff;
+  border:none;border-radius:50%;width:38px;height:38px;font-size:18px;cursor:pointer;
+}
+
+.kierunki{display:flex;gap:8px;margin-top:4px}
+.kierunki button{
+  flex:1;border:1.5px solid var(--linia);background:#FCFBF8;border-radius:10px;
+  padding:10px;font-size:14px;font-family:'Inter';font-weight:600;color:var(--szary);cursor:pointer;
+}
+.kierunki button.wyb{border-color:var(--atrament);background:var(--atrament);color:#fff}
+.poz-karta{background:var(--karta);border:1px solid var(--linia);border-radius:var(--promien);padding:12px 14px;margin-bottom:10px}
+.poz-naglowek{display:flex;gap:12px;align-items:flex-start}
+.poz-naglowek .tresc{flex:1;min-width:0}
+.poz-mini{width:56px;height:56px;border-radius:9px;object-fit:cover;flex-shrink:0;cursor:pointer}
+.poz-karta h3{font-size:15px}
+.poz-karta .kto{font-size:13.5px;margin:4px 0;color:var(--szary)}
+.poz-karta .kto b{color:var(--atrament)}
+.poz-akcje{display:flex;gap:8px;margin-top:10px}
+.poz-akcje button{
+  flex:1;border-radius:9px;padding:9px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:'Inter';
+}
+.b-oddane{border:none;background:var(--ok);color:#fff}
+.b-usun{border:1.5px solid var(--linia);background:none;color:var(--szary)}
+.status-oddane{opacity:.62}
+.znaczek{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:20px;vertical-align:middle}
+.zn-od{background:#E3EDE6;color:var(--ok)}
+.zn-do{background:#FBEACB;color:var(--tasma-ciemna)}
+.podtytul{font-family:'Archivo';font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--szary);margin:20px 2px 10px}
+
+#toast{
+  position:fixed;left:50%;bottom:88px;transform:translateX(-50%) translateY(20px);
+  background:var(--atrament);color:#fff;padding:11px 18px;border-radius:12px;
+  font-size:14px;opacity:0;transition:.25s;z-index:80;pointer-events:none;white-space:nowrap;
+}
+#toast.pokaz{opacity:1;transform:translateX(-50%) translateY(0)}
+.spin{width:26px;height:26px;border:3px solid var(--linia);border-top-color:var(--tasma);border-radius:50%;animation:kr 0.8s linear infinite;margin:24px auto}
+@keyframes kr{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>MAGAZYN <span>DOMOWY</span></h1>
+  <div style="display:flex;gap:8px">
+    <button id="btnInstaluj" onclick="instaluj()" style="display:none;background:var(--tasma);border:none;color:var(--atrament);border-radius:8px;padding:6px 12px;font-size:12px;font-family:'Inter';font-weight:600;cursor:pointer">⤓ Instaluj</button>
+    <button id="btnArkusz" onclick="otworzArkusz()">Arkusz ▸</button>
+  </div>
+</header>
+
+<main>
+
+<!-- ====== DODAJ ====== -->
+<section id="tab-dodaj" class="act">
+  <div class="karta">
+    <div class="fotoPodglad" id="strefa-item" hidden>
+      <img alt="Podgląd zdjęcia">
+      <button class="fotoUsun" onclick="usunFoto('item',event)">✕ usuń</button>
+    </div>
+    <div class="fotoPrzyciski">
+      <button onclick="document.getElementById('fotoAparat-item').click()">
+        <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Aparat
+      </button>
+      <button onclick="document.getElementById('fotoGaleria-item').click()">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+        Galeria
+      </button>
+    </div>
+    <div class="fotoInfo" id="info-item"></div>
+    <input type="file" id="fotoAparat-item" accept="image/*" capture="environment" hidden onchange="wybranoFoto(this,'item')">
+    <input type="file" id="fotoGaleria-item" accept="image/*" hidden onchange="wybranoFoto(this,'item')">
+
+    <label for="fNazwa">Co to jest? *</label>
+    <input type="text" id="fNazwa" placeholder="np. żarówka do lampy solnej">
+
+    <label for="fLok">Gdzie się znajduje? *</label>
+    <input type="text" id="fLok" placeholder="np. biurko, 2. szuflada" list="listaLok">
+    <datalist id="listaLok"></datalist>
+
+    <label for="fKat">Kategoria</label>
+    <input type="text" id="fKat" placeholder="np. elektryka, narzędzia, ogród" list="listaKat">
+    <datalist id="listaKat"></datalist>
+
+    <label for="fKom">Komentarz</label>
+    <textarea id="fKom" placeholder="np. zapasowa, 15W, pasuje też do lampki nocnej"></textarea>
+
+    <button class="btn btn-glowny" id="btnZapisz" onclick="zapiszPrzedmiot()">＋ Dodaj do magazynu</button>
+  </div>
+</section>
+
+<!-- ====== SZUKAJ ====== -->
+<section id="tab-szukaj">
+  <div id="szukajPole">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <input type="text" id="szukajInput" placeholder="Szukaj: nazwa, miejsce, kategoria…" oninput="filtruj()">
+  </div>
+  <div class="licznik" id="licznik"></div>
+  <div id="lista"><div class="spin"></div></div>
+</section>
+
+<!-- ====== POŻYCZONE ====== -->
+<section id="tab-pozyczone">
+  <div class="karta">
+    <div class="fotoPodglad" id="strefa-loan" hidden>
+      <img alt="Podgląd zdjęcia">
+      <button class="fotoUsun" onclick="usunFoto('loan',event)">✕ usuń</button>
+    </div>
+    <div class="fotoPrzyciski">
+      <button onclick="document.getElementById('fotoAparat-loan').click()">
+        <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Aparat
+      </button>
+      <button onclick="document.getElementById('fotoGaleria-loan').click()">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+        Galeria
+      </button>
+    </div>
+    <div class="fotoInfo" id="info-loan"></div>
+    <input type="file" id="fotoAparat-loan" accept="image/*" capture="environment" hidden onchange="wybranoFoto(this,'loan')">
+    <input type="file" id="fotoGaleria-loan" accept="image/*" hidden onchange="wybranoFoto(this,'loan')">
+
+    <label for="pPrzedmiot">Przedmiot *</label>
+    <input type="text" id="pPrzedmiot" placeholder="np. wiertarka">
+    <label for="pOsoba">Osoba *</label>
+    <input type="text" id="pOsoba" placeholder="np. Tomek">
+    <label>Kierunek</label>
+    <div class="kierunki">
+      <button id="kOd" class="wyb" onclick="ustawKierunek('od')">⬇ Pożyczyłem OD kogoś</button>
+      <button id="kDo" onclick="ustawKierunek('do')">⬆ Pożyczyłem KOMUŚ</button>
+    </div>
+    <label for="pNotatka">Notatka</label>
+    <input type="text" id="pNotatka" placeholder="opcjonalnie">
+    <button class="btn btn-glowny" id="btnPozycz" onclick="zapiszPozyczke()">＋ Zapisz pożyczkę</button>
+  </div>
+  <div class="podtytul">Aktywne</div>
+  <div id="listaAktywne"><div class="spin"></div></div>
+  <div class="podtytul">Oddane</div>
+  <div id="listaOddane"></div>
+</section>
+
+</main>
+
+<!-- ====== NAWIGACJA ====== -->
+<nav>
+  <button class="tabbtn act" data-tab="dodaj" onclick="pokazTab('dodaj')">
+    <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Dodaj
+  </button>
+  <button class="tabbtn" data-tab="szukaj" onclick="pokazTab('szukaj')">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>Szukaj
+  </button>
+  <button class="tabbtn" data-tab="pozyczone" onclick="pokazTab('pozyczone')">
+    <svg viewBox="0 0 24 24"><path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>Pożyczone
+  </button>
+</nav>
+
+<!-- ====== MODAL PRZEDMIOTU ====== -->
+<div id="modal" onclick="if(event.target===this)zamknijModal()">
+  <div id="modalKarta">
+    <div class="uchwyt"></div>
+
+    <!-- widok podglądu -->
+    <div id="mWidok">
+      <h2 id="mNazwa" style="font-size:19px"></h2>
+      <div style="margin:8px 0"><span class="etykieta" id="mLok"></span></div>
+      <img id="modalFoto" alt="Zdjęcie przedmiotu">
+      <div id="modalFotoStan"></div>
+      <div class="mrzad" id="mKatBlok"><b>Kategoria</b><span id="mKat"></span></div>
+      <div class="mrzad" id="mKomBlok"><b>Komentarz</b><span id="mKom"></span></div>
+      <div class="mrzad"><b id="mDataLabel">Dodano</b><span id="mData"></span></div>
+      <button class="btn btn-edytuj" id="btnEdytujModal" onclick="wejdzWEdycje()">✎ Edytuj</button>
+      <button class="btn btn-usun" id="btnUsunModal" onclick="usunAktualny()">Usuń przedmiot</button>
+    </div>
+
+    <!-- widok edycji -->
+    <div id="mEdycja" hidden>
+      <h2 style="font-size:19px">Edytuj przedmiot</h2>
+      <label for="eNazwa">Nazwa</label>
+      <input type="text" id="eNazwa">
+      <label for="eLok">Lokalizacja</label>
+      <input type="text" id="eLok" list="listaLok">
+      <button class="btn btn-glowny" id="btnZapiszEdycje" onclick="zapiszEdycje()">Zapisz zmiany</button>
+      <button class="btn btn-usun" style="border-color:var(--linia);color:var(--szary)" onclick="anulujEdycje()">Anuluj</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== PODGLĄD ZDJĘCIA POŻYCZKI ====== -->
+<div id="foto-overlay" onclick="if(event.target===this)zamknijOverlay()">
+  <button class="zamknij" onclick="zamknijOverlay()">✕</button>
+  <img id="overlayFoto" alt="Zdjęcie">
+  <div class="stan" id="overlayStan"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ================= STAN =================
+var przedmioty = [];
+var pozyczki = [];
+var foto = { item:{full:null, mini:null}, loan:{full:null, mini:null} };
+var aktualnyId = null;
+var kierunek = 'od';
+
+// ================= API (fetch do Apps Script) =================
+function api(akcja, dane){
+  dane = dane || {};
+  dane.akcja = akcja;
+  dane.klucz = API_KLUCZ;
+  return fetch(API_URL, {
+    method: 'POST',
+    // text/plain omija preflight CORS — Apps Script i tak czyta postData.contents
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(dane)
+  }).then(function(r){ return r.json(); }).then(function(o){
+    if(o && o.ok===false) throw new Error(o.error || 'Błąd serwera');
+    return o;
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  if(!API_URL || API_URL.indexOf('exec')===-1){
+    document.getElementById('lista').innerHTML =
+      '<div class="pusto"><b>Brak konfiguracji</b>Uzupełnij API_URL w pliku config.js</div>';
+    return;
+  }
+  wczytajWszystko();
+  // rejestracja service workera (instalowalność + offline UI)
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  }
+});
+
+// jeden strzał po całość: przedmioty + pożyczki
+function wczytajWszystko(){
+  api('lista').then(function(o){
+    przedmioty = o.przedmioty || [];
+    pozyczki = o.pozyczki || [];
+    filtruj();
+    uzupelnijPodpowiedzi();
+    rysujPozyczki();
+  }).catch(function(e){
+    document.getElementById('lista').innerHTML =
+      '<div class="pusto"><b>Błąd połączenia</b>'+esc(e.message)+'</div>';
+    document.getElementById('listaAktywne').innerHTML =
+      '<div class="pusto">'+esc(e.message)+'</div>';
+  });
+}
+function odswiezPrzedmioty(){ wczytajWszystko(); }
+function odswiezPozyczki(){ wczytajWszystko(); }
+
+// ================= INSTALACJA PWA =================
+var zdarzenieInstalacji = null;
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  zdarzenieInstalacji = e;
+  document.getElementById('btnInstaluj').style.display = 'block';
+});
+function instaluj(){
+  if(!zdarzenieInstalacji){
+    toast('Menu przeglądarki → „Dodaj do ekranu głównego”');
+    return;
+  }
+  zdarzenieInstalacji.prompt();
+  zdarzenieInstalacji.userChoice.then(function(){
+    zdarzenieInstalacji = null;
+    document.getElementById('btnInstaluj').style.display = 'none';
+  });
+}
+window.addEventListener('appinstalled', function(){
+  document.getElementById('btnInstaluj').style.display = 'none';
+});
+
+function pokazTab(nazwa){
+  document.querySelectorAll('section').forEach(function(s){s.classList.remove('act')});
+  document.getElementById('tab-'+nazwa).classList.add('act');
+  document.querySelectorAll('.tabbtn').forEach(function(b){
+    b.classList.toggle('act', b.dataset.tab===nazwa);
+  });
+  window.scrollTo(0,0);
+}
+
+function toast(t){
+  var el = document.getElementById('toast');
+  el.textContent = t;
+  el.classList.add('pokaz');
+  setTimeout(function(){el.classList.remove('pokaz')}, 2400);
+}
+
+// ================= ZDJĘCIE + KOMPRESJA (aparat i galeria) =================
+function wybranoFoto(input, cel){
+  var plik = input.files[0];
+  if(!plik) return;
+  var rozmiarWej = (plik.size/1024/1024).toFixed(1);
+  document.getElementById('info-'+cel).textContent = 'Optymalizuję zdjęcie…';
+  var img = new Image();
+  var url = URL.createObjectURL(plik);
+  img.onload = function(){
+    var d1 = skaluj(img, 1280, 0.75);
+    foto[cel].full = d1.split(',')[1];
+    foto[cel].mini = skaluj(img, 220, 0.6);
+    var strefa = document.getElementById('strefa-'+cel);
+    strefa.querySelector('img').src = d1;
+    strefa.hidden = false;
+    var rozmiarWyj = Math.round(foto[cel].full.length*0.75/1024);
+    document.getElementById('info-'+cel).textContent =
+      'Zdjęcie zoptymalizowane: ' + rozmiarWej + ' MB → ~' + rozmiarWyj + ' KB';
+    URL.revokeObjectURL(url);
+  };
+  img.onerror = function(){ document.getElementById('info-'+cel).textContent='Nie udało się wczytać zdjęcia'; };
+  img.src = url;
+  input.value=''; // pozwala wybrać ten sam plik ponownie
+}
+
+function skaluj(img, maxBok, jakosc){
+  var w = img.width, h = img.height;
+  if(Math.max(w,h) > maxBok){
+    var s = maxBok/Math.max(w,h);
+    w = Math.round(w*s); h = Math.round(h*s);
+  }
+  var c = document.createElement('canvas');
+  c.width=w; c.height=h;
+  c.getContext('2d').drawImage(img,0,0,w,h);
+  return c.toDataURL('image/jpeg', jakosc);
+}
+
+function usunFoto(cel, e){
+  if(e) e.stopPropagation();
+  foto[cel].full=null; foto[cel].mini=null;
+  var strefa = document.getElementById('strefa-'+cel);
+  strefa.hidden = true;
+  strefa.querySelector('img').src = '';
+  document.getElementById('info-'+cel).textContent='';
+}
+
+// ================= DODAWANIE PRZEDMIOTU =================
+function zapiszPrzedmiot(){
+  var nazwa = val('fNazwa'), lok = val('fLok');
+  if(!nazwa){ toast('Podaj nazwę przedmiotu'); return; }
+  if(!lok){ toast('Podaj lokalizację'); return; }
+  var btn = document.getElementById('btnZapisz');
+  btn.disabled=true; btn.textContent='Zapisuję…';
+  api('dodajPrzedmiot', {
+    nazwa:nazwa, lokalizacja:lok,
+    kategoria:val('fKat'), komentarz:val('fKom'),
+    fotoBase64:foto.item.full, fotoThumb:foto.item.mini
+  }).then(function(){
+    btn.disabled=false; btn.textContent='＋ Dodaj do magazynu';
+    toast('Dodano: '+nazwa);
+    ['fNazwa','fLok','fKat','fKom'].forEach(function(i){document.getElementById(i).value=''});
+    usunFoto('item');
+    wczytajWszystko();
+  }).catch(function(e){
+    btn.disabled=false; btn.textContent='＋ Dodaj do magazynu';
+    toast('Błąd zapisu: '+e.message);
+  });
+}
+
+function val(id){ return document.getElementById(id).value.trim(); }
+
+// ================= SZUKANIE =================
+function normalizuj(t){
+  return (t||'').toString().toLowerCase()
+    .replace(/ą/g,'a').replace(/ć/g,'c').replace(/ę/g,'e').replace(/ł/g,'l')
+    .replace(/ń/g,'n').replace(/ó/g,'o').replace(/ś/g,'s').replace(/ż/g,'z').replace(/ź/g,'z');
+}
+
+function filtruj(){
+  var q = normalizuj(document.getElementById('szukajInput').value);
+  var wszystko = przedmioty.map(function(p){ p.typ='item'; return p; }).concat(
+    pozyczki.filter(function(z){ return z.status==='pożyczone'; }).map(function(z){
+      return {
+        typ:'loan', id:z.id, nazwa:z.przedmiot,
+        lokalizacja:(z.kierunek==='do'?'u: ':'od: ')+z.osoba,
+        kierunek:z.kierunek,
+        kategoria:'pożyczone', komentarz:z.notatka,
+        data:z.dataPozyczenia, fileId:z.fileId, thumb:z.thumb
+      };
+    })
+  );
+  var wyn = !q ? wszystko : wszystko.filter(function(p){
+    return normalizuj(p.nazwa+' '+p.lokalizacja+' '+p.kategoria+' '+p.komentarz).indexOf(q)>-1;
+  });
+  document.getElementById('licznik').textContent =
+    wyn.length + (wyn.length===1?' przedmiot':(wyn.length>=2&&wyn.length<=4?' przedmioty':' przedmiotów'));
+  var el = document.getElementById('lista');
+  if(!wyn.length){
+    el.innerHTML = '<div class="pusto"><b>'+(q?'Nic nie znaleziono':'Magazyn jest pusty')+'</b>'+
+      (q?'Spróbuj innego słowa':'Dodaj pierwszy przedmiot w zakładce „Dodaj”')+'</div>';
+    return;
+  }
+  el.innerHTML = wyn.map(function(p){
+    var mini = p.thumb
+      ? '<img class="mini" src="'+p.thumb+'" alt="">'
+      : '<div class="mini"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></div>';
+    var badge = p.typ==='loan'
+      ? ' <span class="znaczek '+(p.kierunek==='do'?'zn-do':'zn-od')+'">pożyczone</span>'
+      : '';
+    return '<div class="pozycja" onclick="otworzModal(\''+p.id+'\',\''+p.typ+'\')">'+mini+
+      '<div class="tresc"><h3>'+esc(p.nazwa)+badge+'</h3>'+
+      '<span class="etykieta">'+esc(p.lokalizacja)+'</span>'+
+      '<div class="meta">'+(p.kategoria?esc(p.kategoria)+' · ':'')+p.data+'</div></div></div>';
+  }).join('');
+}
+
+function esc(t){var d=document.createElement('div');d.textContent=t||'';return d.innerHTML;}
+
+function uzupelnijPodpowiedzi(){
+  var kat={}, lok={};
+  przedmioty.forEach(function(p){
+    if(p.kategoria) kat[p.kategoria]=1;
+    if(p.lokalizacja) lok[p.lokalizacja]=1;
+  });
+  document.getElementById('listaKat').innerHTML = Object.keys(kat).map(function(k){return '<option value="'+esc(k)+'">'}).join('');
+  document.getElementById('listaLok').innerHTML = Object.keys(lok).map(function(k){return '<option value="'+esc(k)+'">'}).join('');
+}
+
+// ================= MODAL PRZEDMIOTU =================
+var aktualnyTyp = 'item';
+function otworzModal(id, typ){
+  typ = (typ==='loan') ? 'loan' : 'item';
+  var p;
+  if(typ==='loan'){
+    var z = pozyczki.find(function(x){return x.id===id});
+    if(!z) return;
+    p = { id:z.id, nazwa:z.przedmiot,
+          lokalizacja:(z.kierunek==='do'?'u: ':'od: ')+z.osoba,
+          kategoria:'pożyczone', komentarz:z.notatka,
+          data:z.dataPozyczenia, fileId:z.fileId, thumb:z.thumb };
+  } else {
+    p = przedmioty.find(function(x){return x.id===id});
+    if(!p) return;
+  }
+  aktualnyId = id;
+  aktualnyTyp = typ;
+  document.getElementById('btnEdytujModal').style.display = (typ==='loan') ? 'none' : 'block';
+  document.getElementById('mDataLabel').textContent = (typ==='loan') ? 'Pożyczono' : 'Dodano';
+  document.getElementById('btnUsunModal').textContent = (typ==='loan') ? 'Usuń wpis pożyczki' : 'Usuń przedmiot';
+  document.getElementById('mNazwa').textContent = p.nazwa;
+  document.getElementById('mLok').textContent = p.lokalizacja;
+  document.getElementById('mKat').textContent = p.kategoria||'';
+  document.getElementById('mKatBlok').style.display = p.kategoria?'block':'none';
+  document.getElementById('mKom').textContent = p.komentarz||'';
+  document.getElementById('mKomBlok').style.display = p.komentarz?'block':'none';
+  document.getElementById('mData').textContent = p.data;
+  var f = document.getElementById('modalFoto');
+  var stan = document.getElementById('modalFotoStan');
+  f.style.display='none'; f.src='';
+  if(p.fileId){
+    if(p.thumb){ f.src=p.thumb; f.style.display='block'; }
+    stan.textContent='Wczytuję pełne zdjęcie…';
+    api('zdjecie', {fileId:p.fileId}).then(function(o){
+      if(o.dataUrl && aktualnyId===id){ f.src=o.dataUrl; f.style.display='block'; }
+      stan.textContent='';
+    }).catch(function(){ stan.textContent=''; });
+  } else stan.textContent='';
+  pokazWidokModalu();
+  document.getElementById('modal').classList.add('otw');
+}
+
+function pokazWidokModalu(){
+  document.getElementById('mWidok').hidden = false;
+  document.getElementById('mEdycja').hidden = true;
+}
+
+function wejdzWEdycje(){
+  var p = przedmioty.find(function(x){return x.id===aktualnyId});
+  if(!p) return;
+  document.getElementById('eNazwa').value = p.nazwa || '';
+  document.getElementById('eLok').value = p.lokalizacja || '';
+  document.getElementById('mWidok').hidden = true;
+  document.getElementById('mEdycja').hidden = false;
+}
+
+function anulujEdycje(){ pokazWidokModalu(); }
+
+function zapiszEdycje(){
+  var nazwa = document.getElementById('eNazwa').value.trim();
+  var lok = document.getElementById('eLok').value.trim();
+  if(!nazwa){ toast('Podaj nazwę'); return; }
+  if(!lok){ toast('Podaj lokalizację'); return; }
+  var id = aktualnyId;
+  var btn = document.getElementById('btnZapiszEdycje');
+  btn.disabled = true; btn.textContent = 'Zapisuję…';
+  api('edytujPrzedmiot', {id:id, nazwa:nazwa, lokalizacja:lok}).then(function(){
+    btn.disabled=false; btn.textContent='Zapisz zmiany';
+    var p = przedmioty.find(function(x){return x.id===id});
+    if(p){ p.nazwa=nazwa; p.lokalizacja=lok; }
+    document.getElementById('mNazwa').textContent = nazwa;
+    document.getElementById('mLok').textContent = lok;
+    pokazWidokModalu();
+    filtruj();
+    uzupelnijPodpowiedzi();
+    toast('Zapisano zmiany');
+  }).catch(function(e){
+    btn.disabled=false; btn.textContent='Zapisz zmiany';
+    toast('Błąd: '+e.message);
+  });
+}
+
+function zamknijModal(){ document.getElementById('modal').classList.remove('otw'); aktualnyId=null; pokazWidokModalu(); }
+
+function usunAktualny(){
+  if(!aktualnyId) return;
+  var id = aktualnyId;
+  if(aktualnyTyp==='loan'){
+    if(!confirm('Usunąć ten wpis pożyczki?')) return;
+    zamknijModal();
+    pozyczki = pozyczki.filter(function(p){return p.id!==id});
+    rysujPozyczki();
+    filtruj();
+    api('usunPozyczke', {id:id}).then(function(){ toast('Usunięto'); })
+      .catch(function(e){ toast('Błąd: '+e.message); wczytajWszystko(); });
+    return;
+  }
+  if(!confirm('Usunąć ten przedmiot z magazynu?')) return;
+  zamknijModal();
+  przedmioty = przedmioty.filter(function(p){return p.id!==id});
+  filtruj();
+  api('usunPrzedmiot', {id:id}).then(function(){ toast('Usunięto'); })
+    .catch(function(e){ toast('Błąd: '+e.message); wczytajWszystko(); });
+}
+
+// ================= POŻYCZONE =================
+function ustawKierunek(k){
+  kierunek=k;
+  document.getElementById('kOd').classList.toggle('wyb',k==='od');
+  document.getElementById('kDo').classList.toggle('wyb',k==='do');
+}
+
+function zapiszPozyczke(){
+  var prz = val('pPrzedmiot'), os = val('pOsoba');
+  if(!prz){ toast('Podaj przedmiot'); return; }
+  if(!os){ toast('Podaj osobę'); return; }
+  var btn=document.getElementById('btnPozycz');
+  btn.disabled=true; btn.textContent='Zapisuję…';
+  api('dodajPozyczke', {
+    przedmiot:prz, osoba:os, kierunek:kierunek, notatka:val('pNotatka'),
+    fotoBase64:foto.loan.full, fotoThumb:foto.loan.mini
+  }).then(function(){
+    btn.disabled=false; btn.textContent='＋ Zapisz pożyczkę';
+    document.getElementById('pPrzedmiot').value='';
+    document.getElementById('pOsoba').value='';
+    document.getElementById('pNotatka').value='';
+    usunFoto('loan');
+    toast('Zapisano pożyczkę');
+    wczytajWszystko();
+  }).catch(function(e){
+    btn.disabled=false; btn.textContent='＋ Zapisz pożyczkę';
+    toast('Błąd: '+e.message);
+  });
+}
+
+function rysujPozyczki(){
+  var akt = pozyczki.filter(function(p){return p.status==='pożyczone'});
+  var odd = pozyczki.filter(function(p){return p.status!=='pożyczone'});
+  document.getElementById('listaAktywne').innerHTML = akt.length ? akt.map(kartaPoz).join('') :
+    '<div class="pusto">Brak aktywnych pożyczek 👍</div>';
+  document.getElementById('listaOddane').innerHTML = odd.length ? odd.map(kartaPoz).join('') :
+    '<div class="pusto" style="padding:16px">—</div>';
+}
+
+function kartaPoz(p){
+  var zn = p.kierunek==='do'
+    ? '<span class="znaczek zn-do">komuś</span>'
+    : '<span class="znaczek zn-od">od kogoś</span>';
+  var kto = p.kierunek==='do' ? 'Pożyczone <b>'+esc(p.osoba)+'</b>' : 'Pożyczone od <b>'+esc(p.osoba)+'</b>';
+  var aktywna = p.status==='pożyczone';
+  var mini = p.thumb
+    ? '<img class="poz-mini" src="'+p.thumb+'" alt="" onclick="pokazFotoPozyczki(\''+p.id+'\')">'
+    : '';
+  return '<div class="poz-karta'+(aktywna?'':' status-oddane')+'">'+
+    '<div class="poz-naglowek">'+mini+
+    '<div class="tresc"><h3>'+esc(p.przedmiot)+' '+zn+'</h3>'+
+    '<div class="kto">'+kto+' · '+p.dataPozyczenia+
+    (aktywna?'':' → oddane '+p.dataOddania)+'</div>'+
+    (p.notatka?'<div class="kto">'+esc(p.notatka)+'</div>':'')+
+    '</div></div>'+
+    '<div class="poz-akcje">'+
+    (aktywna?'<button class="b-oddane" onclick="oddane(\''+p.id+'\')">✓ Oddane</button>':'')+
+    '<button class="b-usun" onclick="usunPoz(\''+p.id+'\')">Usuń</button>'+
+    '</div></div>';
+}
+
+function pokazFotoPozyczki(id){
+  var p = pozyczki.find(function(x){return x.id===id});
+  if(!p || !p.fileId) return;
+  var ov = document.getElementById('foto-overlay');
+  var im = document.getElementById('overlayFoto');
+  var stan = document.getElementById('overlayStan');
+  im.src = p.thumb || '';
+  stan.textContent = 'Wczytuję pełne zdjęcie…';
+  ov.classList.add('otw');
+  api('zdjecie', {fileId:p.fileId}).then(function(o){
+    if(o.dataUrl){ im.src=o.dataUrl; }
+    stan.textContent='';
+  }).catch(function(){ stan.textContent=''; });
+}
+
+function zamknijOverlay(){
+  document.getElementById('foto-overlay').classList.remove('otw');
+  document.getElementById('overlayFoto').src='';
+}
+
+function oddane(id){
+  api('oznaczOddane', {id:id}).then(function(){ toast('Oznaczono jako oddane'); wczytajWszystko(); })
+    .catch(function(e){ toast('Błąd: '+e.message); });
+}
+
+function usunPoz(id){
+  if(!confirm('Usunąć wpis?')) return;
+  api('usunPozyczke', {id:id}).then(function(){ wczytajWszystko(); })
+    .catch(function(e){ toast('Błąd: '+e.message); });
+}
+
+// ================= ARKUSZ =================
+function otworzArkusz(){
+  api('linkArkusza').then(function(o){ if(o.url) window.open(o.url,'_blank'); })
+    .catch(function(e){ toast('Błąd: '+e.message); });
+}
+</script>
+</body>
+</html>
